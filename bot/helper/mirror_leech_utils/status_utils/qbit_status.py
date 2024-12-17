@@ -56,14 +56,14 @@ class QbittorrentStatus:
             return MirrorStatus.STATUS_QUEUEDL
         elif state == "queuedUP":
             return MirrorStatus.STATUS_QUEUEUP
-        elif state in ["pausedDL", "pausedUP"]:
+        elif state in ["stoppedDL", "stoppedUP"]:
             return MirrorStatus.STATUS_PAUSED
         elif state in ["checkingUP", "checkingDL"]:
-            return MirrorStatus.STATUS_CHECKING
+            return MirrorStatus.STATUS_CHECK
         elif state in ["stalledUP", "uploading"] and self.seeding:
-            return MirrorStatus.STATUS_SEEDING
+            return MirrorStatus.STATUS_SEED
         else:
-            return MirrorStatus.STATUS_DOWNLOADING
+            return MirrorStatus.STATUS_DOWNLOAD
 
     def seeders_num(self):
         return self._info.num_seeds
@@ -96,7 +96,7 @@ class QbittorrentStatus:
         self.listener.is_cancelled = True
         await sync_to_async(self.update)
         await sync_to_async(
-            qbittorrent_client.torrents_pause, torrent_hashes=self._info.hash
+            qbittorrent_client.torrents_stop, torrent_hashes=self._info.hash
         )
         if not self.seeding:
             if self.queued:
